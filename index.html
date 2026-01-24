@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEFT // CLAN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #ffffff;
+            --bg: #000000;
+            --accent: #ffffff;
+            --btn-glow: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== ЧЕРНО-БЕЛЫЙ ЗАГРУЗОЧНЫЙ ЭКРАН ===== */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            overflow: hidden;
+        }
+
+        .monochrome-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: gridPulse 4s infinite alternate;
+            opacity: 0.3;
+        }
+
+        .binary-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .binary-digit {
+            position: absolute;
+            animation: binaryFall linear infinite;
+        }
+
+        .loader-container {
+            position: relative;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .neft-loader {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            margin: 0 auto 40px;
+        }
+
+        .loader-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spinRing 2s linear infinite;
+        }
+
+            .loader-ring:nth-child(1) {
+                width: 100px;
+                height: 100px;
+                border-top-color: #fff;
+            }
+
+            .loader-ring:nth-child(2) {
+                width: 120px;
+                height: 120px;
+                border-top-color: #888;
+                animation-delay: 0.5s;
+                animation-duration: 3s;
+            }
+
+            .loader-ring:nth-child(3) {
+                width: 140px;
+                height: 140px;
+                border-top-color: #444;
+                animation-delay: 1s;
+                animation-duration: 4s;
+            }
+
+        .loader-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .loader-text::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, #fff, transparent);
+                animation: textScan 2s infinite linear;
+            }
+
+        .pixel-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin: 30px auto;
+        }
+
+            .pixel-progress::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 0%;
+                background: #fff;
+                animation: pixelLoad 2.5s ease-in-out forwards;
+                box-shadow: 0 0 10px #fff;
+            }
+
+        .status-lines {
+            margin-top: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #666;
+            text-align: left;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .status-line {
+            margin: 5px 0;
+            opacity: 0;
+            animation: lineAppear 0.3s forwards;
+        }
+
+            .status-line:nth-child(1) {
+                animation-delay: 0.5s;
+            }
+
+            .status-line:nth-child(2) {
+                animation-delay: 1s;
+            }
+
+            .status-line:nth-child(3) {
+                animation-delay: 1.5s;
+            }
+
+            .status-line:nth-child(4) {
+                animation-delay: 2s;
+            }
+
+        /* Анимации */
+        @keyframes gridPulse {
+            0%, 100% {
+                opacity: 0.1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes binaryFall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        @keyframes spinRing {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes textScan {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        @keyframes pixelLoad {
+            0% {
+                width: 0%;
+            }
+
+            70% {
+                width: 85%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        @keyframes lineAppear {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== КНОПКА БУРГЕР МЕНЮ ===== */
+        .burger-menu {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+            cursor: pointer;
+            width: 40px;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+            transition: all 0.3s ease;
+        }
+
+            .burger-menu:hover {
+                border-color: #fff;
+                background: rgba(255, 255, 255, 0.1);
+                transform: scale(1.05);
+            }
+
+        .burger-line {
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .burger-menu.active .burger-line:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .burger-menu.active .burger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger-menu.active .burger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* ===== ВЫПАДАЮЩЕЕ МЕНЮ ===== */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 900;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+            .menu-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 950;
+            padding: 30px;
+            overflow-y: auto;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+            .side-menu.active {
+                right: 0;
+            }
+
+        .menu-item {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            text-decoration: none;
+            padding: 18px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+            .menu-item i {
+                font-size: 1.1rem;
+                width: 20px;
+                text-align: center;
+            }
+
+            .menu-item:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.3);
+                transform: translateX(-5px);
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+
+            .menu-item.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+                .menu-item.disabled:hover {
+                    background: rgba(255, 255, 255, 0.05);
+                    border-color: rgba(255, 255, 255, 0.1);
+                    transform: none;
+                    box-shadow: none;
+                }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        #main-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            flex: 1;
+        }
+
+        .main-loaded {
+            display: block !important;
+            opacity: 1 !important;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container {
+            z-index: 1;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        /* Главная секция */
+        .main-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .tilt-box {
+            perspective: 1000px;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: transform 0.1s ease-out;
+        }
+
+        .spin-box {
+            display: block;
+            cursor: pointer;
+        }
+
+        .logo-img {
+            width: 280px;
+            max-width: 80vw;
+            display: block;
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+            border-radius: 8px;
+        }
+
+        .spinning {
+            animation: spinEffect 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes spinEffect {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+
+        .clan-title {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 12px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            color: #fff;
+        }
+
+            .clan-title span {
+                display: inline-block;
+                transition: all 0.3s ease;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+                animation: letterPulse 4s infinite ease-in-out;
+            }
+
+                .clan-title span:nth-child(1) {
+                    animation-delay: 0s;
+                }
+
+                .clan-title span:nth-child(2) {
+                    animation-delay: 0.5s;
+                }
+
+                .clan-title span:nth-child(3) {
+                    animation-delay: 1s;
+                }
+
+                .clan-title span:nth-child(4) {
+                    animation-delay: 1.5s;
+                }
+
+                .clan-title span:hover {
+                    transform: translateY(-5px) scale(1.1);
+                    text-shadow: 0 0 25px #fff, 0 0 50px rgba(255,255,255,0.5);
+                    color: #fff;
+                }
+
+        @keyframes letterPulse {
+            0%, 100% {
+                opacity: 0.8;
+                text-shadow: 0 0 5px rgba(255,255,255,0.2);
+            }
+
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 20px rgba(255,255,255,0.6);
+            }
+        }
+
+        .clan-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: #888;
+            letter-spacing: 4px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .links-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .cybr-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            text-decoration: none;
+            padding: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            box-shadow: inset 0 0 10px var(--btn-glow);
+        }
+
+            .cybr-btn i {
+                margin-right: 15px;
+                font-size: 1.2rem;
+            }
+
+            .cybr-btn:hover {
+                background: #fff;
+                color: #000;
+                border-color: #fff;
+                box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+                transform: translateY(-2px);
+            }
+
+            .cybr-btn.disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+                border-color: #333;
+            }
+
+                .cybr-btn.disabled:hover {
+                    background: transparent;
+                    color: #fff;
+                    transform: none;
+                    box-shadow: none;
+                }
+
+        .footer-info {
+            margin-top: 40px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #444;
+        }
+
+        /* ===== НОВАЯ СЕКЦИЯ С ТЕКСТОМ ===== */
+        .text-section {
+            display: none; /* Скрыто по умолчанию */
+            opacity: 0;
+            background: #000;
+            padding: 80px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+            .text-section.active {
+                display: block;
+                animation: fadeIn 1s ease forwards;
+            }
+
+        .text-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .content-block {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+            .content-block.visible {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .content-block:hover {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: rgba(255, 255, 255, 0.2);
+                transform: translateY(-3px);
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+
+        .content-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .content-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: #aaa;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .content-list {
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+            .content-list li {
+                font-family: 'Share Tech Mono', monospace;
+                font-size: 0.95rem;
+                color: #aaa;
+                line-height: 1.7;
+                margin-bottom: 10px;
+                padding-left: 10px;
+            }
+
+        .content-highlight {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: #ccc;
+            font-style: italic;
+        }
+
+        .content-subtitle {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 25px 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ===== ФУТЕР ===== */
+        .site-footer {
+            background: #000;
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 6px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .footer-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .footer-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-family: 'Share Tech Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+            .footer-link:hover {
+                color: #fff;
+            }
+
+        .copyright {
+            margin-top: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #444;
+        }
+
+        @media (max-width: 600px) {
+            .clan-title {
+                font-size: 3rem;
+                letter-spacing: 8px;
+            }
+
+            .logo-img {
+                width: 220px;
+            }
+
+            .neft-loader {
+                width: 100px;
+                height: 100px;
+            }
+
+            .pixel-progress {
+                width: 250px;
+            }
+
+            .burger-menu {
+                top: 20px;
+                right: 20px;
+                width: 35px;
+                height: 25px;
+            }
+
+            .side-menu {
+                width: 280px;
+                right: -280px;
+                padding: 20px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .content-title {
+                font-size: 1.4rem;
+            }
+
+            .content-text {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .side-menu {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЧЕРНО-БЕЛЫЙ ЗАГРУЗОЧНЫЙ ЭКРАН -->
+    <div id="preloader">
+        <div class="monochrome-grid"></div>
+        <div class="binary-rain" id="binaryRain"></div>
+
+        <div class="loader-container">
+            <div class="neft-loader">
+                <!-- Убран логотип, остались только вращающиеся кольца -->
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+            </div>
+
+            <div class="loader-text">SYSTEM INITIALIZATION</div>
+
+            <div class="pixel-progress"></div>
+
+            <div class="status-lines">
+                <div class="status-line">> LOADING CORE MODULES...</div>
+                <div class="status-line">> DECRYPTING CLAN DATABASE...</div>
+                <div class="status-line">> ESTABLISHING SECURE CONNECTION...</div>
+                <div class="status-line">> NEFT_CLAN V.2.1 READY</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div id="main-content">
+        <!-- Кнопка бургер-меню -->
+        <div class="burger-menu" id="burgerMenu">
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+        </div>
+
+        <!-- Затемнение фона при открытом меню -->
+        <div class="menu-overlay" id="menuOverlay"></div>
+
+        <!-- Боковое меню -->
+        <div class="side-menu" id="sideMenu">
+            <!-- Ссылки ведут на те же вкладки -->
+            <a href="news.html" class="menu-item">
+                <i class="fas fa-newspaper"></i>
+                <span>NEWS</span>
+            </a>
+
+            <a href="scripts.html" class="menu-item">
+                <i class="fas fa-code"></i>
+                <span>SCRIPTS</span>
+            </a>
+
+            <a href="maps.html" class="menu-item">
+                <i class="fas fa-map"></i>
+                <span>MAPS</span>
+            </a>
+
+            <a href="places.html" class="menu-item">
+                <i class="fas fa-gamepad"></i>
+                <span>PLACES</span>
+            </a>
+        </div>
+
+        <!-- Первый фон -->
+        <canvas id="canvas-bg"></canvas>
+
+        <!-- Главная секция -->
+        <section class="main-section">
+            <div class="container">
+                <div class="tilt-box" id="tiltBox">
+                    <div class="spin-box" id="spinBox">
+                        <!-- ЗАМЕНЕННЫЙ ЛОГОТИП -->
+                        <img src="https://images.steamusercontent.com/ugc/17168738664548945775/5FDFECB5E005CA6926D9D92ED587655336067DE1/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false" alt="NEFT" class="logo-img">
+                    </div>
+                </div>
+
+                <h1 class="clan-title">
+                    <span>N</span><span>E</span><span>F</span><span>T</span>
+                </h1>
+
+                <!-- ИЗМЕНЕННАЯ НАДПИСЬ: Strategic Gaming Syndicate → Philosophical Society -->
+                <div class="clan-subtitle">Philosophical Society</div>
+
+                <!-- Оригинальные кнопки без изменений -->
+                <div class="links-grid">
+                    <a href="https://discord.gg/eZBYq9bvjb" target="_blank" class="cybr-btn">
+                        <i class="fab fa-discord"></i> Discord
+                    </a>
+                    <a href="https://t.me/+NkxTBHoFVoU1NmYy" target="_blank" class="cybr-btn">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </a>
+                    <a href="https://www.youtube.com/@nob0d11/videos" target="_blank" class="cybr-btn">
+                        <i class="fab fa-youtube"></i> YouTube
+                    </a>
+                    <a href="#" class="cybr-btn disabled">
+                        <i class="fab fa-twitch"></i> Twitch [Offline]
+                    </a>
+                </div>
+
+                <div class="footer-info">
+                    CORE_V.2.1 // ENCRYPTED ACCESS
+                </div>
+            </div>
+        </section>
+
+        <!-- НОВАЯ СЕКЦИЯ С ТЕКСТОМ (скрыта до скролла) -->
+        <section class="text-section" id="textSection">
+            <div class="text-container">
+                <!-- Заголовок: Не отвлекайся на шум -->
+                <div class="content-block">
+                    <h2 class="content-title" style="text-align: center; font-size: 2.5rem; margin-bottom: 30px;">
+                        НЕ ОТВЛЕКАЙСЯ НА ШУМ
+                    </h2>
+                </div>
+
+                <!-- Основной текст -->
+                <div class="content-block">
+                    <p class="content-text">
+                        NEFT — это место, где цели в играх становятся ближе, а преграды остаются в прошлом. Здесь находят оптимальные пути и делятся знаниями, чтобы вы могли достигать большего с меньшими усилиями.
+                    </p>
+                </div>
+
+                <!-- Наша философия -->
+                <div class="content-block">
+                    <h2 class="content-title">НАША ФИЛОСОФИЯ</h2>
+                    <p class="content-text">
+                        Устали от бесконечного гринда? Застряли на сложном моменте, который отнимает все время и нервы? Столкнулись с ошибкой, из-за которой играть невозможно?
+                    </p>
+                    <p class="content-text">
+                        Наше сообщество скриптеров и энтузиастов игр создано именно для этого. Мы верим, что игра должна приносить радость и удовлетворение, а не превращаться в рутину или борьбу с техническими неполадками.
+                    </p>
+                </div>
+
+                <!-- Чем мы можем помочь вам? -->
+                <div class="content-block">
+                    <h2 class="content-title">ЧЕМ МЫ МОЖЕМ ПОМОЧЬ ВАМ?</h2>
+
+                    <h3 class="content-subtitle">Упрощаем достижение целей</h3>
+                    <p class="content-text">
+                        Нужен эффективный способ фарма ресурсов, прокачки персонажа или получения редкого достижения? Наши участники и гайды помогут оптимизировать процесс, экономя ваши часы и усилия.
+                    </p>
+
+                    <h3 class="content-subtitle">Решаем технические проблемы</h3>
+                    <p class="content-text">
+                        Вылетает игра, лагает интерфейс, не работает мод или скрипт? Наши участники могут помочь разобраться в причине и найти рабочее решение.
+                    </p>
+
+                    <h3 class="content-subtitle">Даем экспертные советы</h3>
+                    <p class="content-text">
+                        Запутались в механике игры, в выборе сборки или стратегии? Получите совет от опытных игроков, которые знают игру до мелочей.
+                    </p>
+
+                    <h3 class="content-subtitle">Автоматизируем рутину</h3>
+                    <p class="content-text">
+                        Позвольте нам позаботиться о скучных повторяющихся задачах, чтобы вы могли посвятить время действительно интересному контенту — рейдам, PvP или исследованию мира.
+                    </p>
+                </div>
+
+                <!-- Наши принципы -->
+                <div class="content-block">
+                    <h2 class="content-title">НАШИ ПРИНЦИПЫ</h2>
+                    <ul class="content-list">
+                        <li><strong>Эффективность:</strong> Мы ценим ваше время. Наши решения нацелены на результат.</li>
+                        <li><strong>Поддержка:</strong> Вы всегда можете задать вопрос и получить помощь от сообщества.</li>
+                        <li><strong>Безопасность:</strong> Мы заботимся о стабильности работы и сохранности ваших аккаунтов.</li>
+                    </ul>
+                </div>
+
+                <!-- Практические услуги -->
+                <div class="content-block">
+                    <h2 class="content-title">ПРАКТИЧЕСКИЕ УСЛУГИ</h2>
+                    <p class="content-text">
+                        Нужен результат здесь и сейчас? Воспользуйтесь нашими услугами. Мы понимаем, что иногда времени в обрез, а цель важна. Для таких случаев у нас есть надежные и проверенные сервисы, которые помогут вам двигаться вперед без задержек.
+                    </p>
+
+                    <h3 class="content-subtitle">Продажа игровой валюты и ресурсов</h3>
+                    <p class="content-text">
+                        Пополните свой кошелек в игре быстро и безопасно. Мы гарантируем четкие условия, быструю доставку и конфиденциальность.
+                    </p>
+
+                    <h3 class="content-subtitle">Бустинг и прокачка аккаунтов</h3>
+                    <p class="content-text">
+                        Достижение сложного ранга, прохождение трудного контента, завершение сюжета или сезонного события. Доверьте это профессионалам, чтобы получить желаемый результат с гарантией.
+                    </p>
+
+                    <h3 class="content-subtitle">Индивидуальные заказы и решения</h3>
+                    <p class="content-text">
+                        Нужен уникальный скрипт, мод или помощь с нестандартной задачей? Наши специалисты готовы взяться за индивидуальный проект.
+                    </p>
+                </div>
+
+                <!-- Ивенты и жизнь сообщества -->
+                <div class="content-block">
+                    <h2 class="content-title">ИВЕНТЫ И ЖИЗНЬ СООБЩЕСТВА</h2>
+                    <p class="content-text">
+                        Не только работаем, но и отдыхаем вместе! Настоящее сообщество — это не только помощь и услуги. Это живое общение, совместные эмоции и фановые мероприятия!
+                    </p>
+                    <p class="content-text">
+                        Мы регулярно проводим тематические ивенты, чтобы разбавить рутину и сплотить наш коллектив:
+                    </p>
+                    <ul class="content-list">
+                        <li>Внутриигровые турниры и соревнования с призами от партнеров и администрации.</li>
+                        <li>Голосовые сходки и игровые вечера в Discord.</li>
+                        <li>Творческие челленджи и розыгрыши.</li>
+                    </ul>
+                </div>
+
+                <!-- Для новых участников -->
+                <div class="content-block">
+                    <h2 class="content-title">ДЛЯ НОВЫХ УЧАСТНИКОВ</h2>
+                    <p class="content-text">
+                        Присоединяйтесь к нашему сообществу! Здесь вас ждут:
+                    </p>
+                    <ul class="content-list">
+                        <li>Обширная библиотека проверенных решений и скриптов.</li>
+                        <li>Активный форум, где можно обсудить любую игровую проблему.</li>
+                        <li>Опытные пользователи, готовые помочь советом.</li>
+                        <li>Постоянно обновляемая база знаний для самых популярных игр.</li>
+                    </ul>
+                    <div class="content-highlight">
+                        Превратите сложности в возможности. Достигайте своих игровых вершин с умом!
+                    </div>
+                </div>
+
+                <!-- Заключительный акцент -->
+                <div class="content-block">
+                    <h2 class="content-title">ЗАКЛЮЧИТЕЛЬНЫЙ АКЦЕНТ</h2>
+                    <p class="content-text" style="font-size: 1.1rem; text-align: center; font-style: italic;">
+                        Игры созданы для наслаждения. Мы созданы, чтобы это наслаждение было полным.<br>
+                        <strong>Добро пожаловать в NEFT</strong>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Футер -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <div class="footer-logo">NEFT</div>
+                <div class="footer-text">
+                    PHILOSOPHICAL SOCIETY // DIGITAL FRONTIER // 2024
+                </div>
+
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Contact</a>
+                    <a href="#" class="footer-link">GitHub</a>
+                </div>
+
+                <div class="copyright">
+                    © 2024 NEFT Philosophical Society. All digital rights encrypted.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Инициализация двоичного дождя
+        function initBinaryRain() {
+            const binaryRain = document.getElementById('binaryRain');
+            const binaryChars = ['0', '1'];
+
+            for (let i = 0; i < 50; i++) {
+                const digit = document.createElement('div');
+                digit.className = 'binary-digit';
+                digit.textContent = Math.random() > 0.5 ? '0' : '1';
+                digit.style.left = `${Math.random() * 100}%`;
+                digit.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                digit.style.animationDelay = `${Math.random() * 2}s`;
+                digit.style.opacity = Math.random() * 0.3 + 0.1;
+                digit.style.fontSize = `${Math.random() * 10 + 10}px`;
+                binaryRain.appendChild(digit);
+            }
+        }
+
+        // Завершение загрузки
+        function completeLoading() {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                const mainContent = document.getElementById('main-content');
+
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+
+                mainContent.classList.add('main-loaded');
+
+                initMainScript();
+            }, 1000);
+        }
+
+        // Управление меню
+        function initMenu() {
+            const burgerMenu = document.getElementById('burgerMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const sideMenu = document.getElementById('sideMenu');
+
+            // Функция закрытия меню
+            function closeMenu() {
+                burgerMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                sideMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Функция открытия меню
+            function openMenu() {
+                burgerMenu.classList.add('active');
+                menuOverlay.classList.add('active');
+                sideMenu.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Функция переключения меню
+            function toggleMenu() {
+                if (burgerMenu.classList.contains('active')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            }
+
+            // Открытие/закрытие меню по клику на бургер
+            burgerMenu.addEventListener('click', toggleMenu);
+
+            // Закрытие меню по клику на overlay
+            menuOverlay.addEventListener('click', closeMenu);
+
+            // Закрытие меню по клавише Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && burgerMenu.classList.contains('active')) {
+                    closeMenu();
+                }
+            });
+
+            // Закрытие меню при клике на ссылку в меню
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    closeMenu();
+                });
+            });
+        }
+
+        // Инициализация первого фона (белые частицы)
+        function initFirstCanvas() {
+            const canvas = document.getElementById('canvas-bg');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [];
+
+            function init() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                particles = Array.from({ length: 80 }, () => ({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    s: Math.random() * 2,
+                    d: Math.random() * 0.5 + 0.2
+                }));
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = "#fff";
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+                    ctx.fill();
+                    p.y += p.d;
+                    if (p.y > h) p.y = -10;
+                });
+                requestAnimationFrame(draw);
+            }
+
+            window.onresize = init;
+            init();
+            draw();
+        }
+
+        // Обработчик скролла для показа текста (более чувствительный)
+        function initScrollHandler() {
+            const textSection = document.getElementById('textSection');
+            let textShown = false;
+
+            window.addEventListener('scroll', function () {
+                // Более чувствительный триггер - срабатывает при любом скролле
+                if (!textShown && window.scrollY > 50) {
+                    textSection.classList.add('active');
+                    textShown = true;
+
+                    // Анимация появления блоков текста
+                    setTimeout(() => {
+                        const contentBlocks = document.querySelectorAll('.content-block');
+                        contentBlocks.forEach((block, index) => {
+                            setTimeout(() => {
+                                block.classList.add('visible');
+                            }, index * 100);
+                        });
+                    }, 200);
+                }
+            });
+
+            // Также показываем текст при клике на страницу (на случай проблем со скроллом)
+            document.addEventListener('click', function () {
+                if (!textShown) {
+                    textSection.classList.add('active');
+                    textShown = true;
+
+                    setTimeout(() => {
+                        const contentBlocks = document.querySelectorAll('.content-block');
+                        contentBlocks.forEach((block, index) => {
+                            setTimeout(() => {
+                                block.classList.add('visible');
+                            }, index * 100);
+                        });
+                    }, 200);
+                }
+            });
+        }
+
+        // Инициализация основного скрипта
+        function initMainScript() {
+            const tiltBox = document.getElementById('tiltBox');
+            const spinBox = document.getElementById('spinBox');
+
+            document.addEventListener('mousemove', (e) => {
+                const x = (window.innerWidth / 2 - e.pageX) / 25;
+                const y = (window.innerHeight / 2 - e.pageY) / 25;
+                tiltBox.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+            });
+
+            spinBox.addEventListener('click', () => {
+                spinBox.classList.remove('spinning');
+                void spinBox.offsetWidth;
+                spinBox.classList.add('spinning');
+            });
+
+            // Инициализация меню
+            initMenu();
+
+            // Инициализация фона
+            initFirstCanvas();
+
+            // Инициализация скролл-обработчика
+            initScrollHandler();
+
+            // Анимация букв при загрузке
+            setTimeout(() => {
+                const letters = document.querySelectorAll('.clan-title span');
+                letters.forEach((letter, index) => {
+                    setTimeout(() => {
+                        letter.style.transform = 'translateY(-8px) scale(1.15)';
+                        letter.style.textShadow = '0 0 25px #fff, 0 0 50px rgba(255,255,255,0.7)';
+
+                        setTimeout(() => {
+                            letter.style.transform = '';
+                            letter.style.textShadow = '';
+                        }, 300);
+                    }, index * 150);
+                });
+            }, 500);
+        }
+
+        // Запуск при загрузке страницы
+        window.addEventListener('load', () => {
+            initBinaryRain();
+
+            // Имитация последовательной загрузки строк статуса
+            const statusLines = document.querySelectorAll('.status-line');
+            statusLines.forEach((line, index) => {
+                setTimeout(() => {
+                    line.style.animation = 'lineAppear 0.3s forwards';
+                }, (index + 1) * 500);
+            });
+
+            setTimeout(completeLoading, 3500);
+        });
+
+        // Альтернатива если страница уже загрузжена
+        if (document.readyState === 'complete') {
+            initBinaryRain();
+            setTimeout(completeLoading, 2000);
+        }
+    </script>
+</body>
+</html>

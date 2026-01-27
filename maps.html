@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAPS // NEFT CLAN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ffffff;
+            --bg: #000000;
+            --accent: #ffffff;
+            --btn-glow: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            overflow: hidden;
+        }
+
+        .monochrome-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: gridPulse 4s infinite alternate;
+            opacity: 0.3;
+        }
+
+        .binary-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .binary-digit {
+            position: absolute;
+            animation: binaryFall linear infinite;
+        }
+
+        .loader-container {
+            position: relative;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .neft-loader {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            margin: 0 auto 40px;
+        }
+
+        .loader-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spinRing 2s linear infinite;
+        }
+
+        .loader-ring:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            border-top-color: #fff;
+        }
+
+        .loader-ring:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            border-top-color: #888;
+            animation-delay: 0.5s;
+            animation-duration: 3s;
+        }
+
+        .loader-ring:nth-child(3) {
+            width: 140px;
+            height: 140px;
+            border-top-color: #444;
+            animation-delay: 1s;
+            animation-duration: 4s;
+        }
+
+        .loader-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-text::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            animation: textScan 2s infinite linear;
+        }
+
+        .pixel-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin: 30px auto;
+        }
+
+        .pixel-progress::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: #fff;
+            animation: pixelLoad 2.5s ease-in-out forwards;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        .status-lines {
+            margin-top: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #666;
+            text-align: left;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .status-line {
+            margin: 5px 0;
+            opacity: 0;
+            animation: lineAppear 0.3s forwards;
+        }
+
+        .status-line:nth-child(1) { animation-delay: 0.5s; }
+        .status-line:nth-child(2) { animation-delay: 1s; }
+        .status-line:nth-child(3) { animation-delay: 1.5s; }
+        .status-line:nth-child(4) { animation-delay: 2s; }
+
+        @keyframes gridPulse { 0%,100% { opacity: 0.1; } 50% { opacity: 0.3; } }
+        @keyframes binaryFall { to { transform: translateY(100vh); } }
+        @keyframes spinRing { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes textScan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        @keyframes pixelLoad { 0% { width: 0%; } 70% { width: 85%; } 100% { width: 100%; } }
+        @keyframes lineAppear { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
+
+        /* Бургер меню */
+        .burger-menu {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+            cursor: pointer;
+            width: 40px;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+            transition: all 0.3s ease;
+        }
+
+        .burger-menu:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .burger-line {
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .burger-menu.active .burger-line:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .burger-menu.active .burger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger-menu.active .burger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* Меню */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 900;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 950;
+            padding: 30px;
+            overflow-y: auto;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .side-menu.active {
+            right: 0;
+        }
+
+        .menu-item {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            text-decoration: none;
+            padding: 18px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Основной контент */
+        #main-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            flex: 1;
+        }
+
+        .main-loaded {
+            display: block !important;
+            opacity: 1 !important;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container {
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 20px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-title {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 12px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .page-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: #888;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Сетка карт */
+        .maps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .map-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .map-image {
+            height: 200px;
+            background: linear-gradient(45deg, #111, #222);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        .map-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-title {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .map-description {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            color: #aaa;
+            line-height: 1.6;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        .map-stats {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .map-download {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 25px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            text-align: center;
+            display: block;
+        }
+
+        .map-download:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* Футер */
+        .site-footer {
+            background: #000;
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 6px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .footer-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .footer-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-family: 'Share Tech Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: #fff;
+        }
+
+        .copyright {
+            margin-top: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #444;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+                letter-spacing: 8px;
+            }
+            
+            .maps-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .burger-menu {
+                top: 20px;
+                right: 20px;
+                width: 35px;
+                height: 25px;
+            }
+            
+            .side-menu {
+                width: 280px;
+                right: -280px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ПРЕЛОАДЕР -->
+    <div id="preloader">
+        <div class="monochrome-grid"></div>
+        <div class="binary-rain" id="binaryRain"></div>
+        <div class="loader-container">
+            <div class="neft-loader">
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+            </div>
+            <div class="loader-text">LOADING MAP DATABASE</div>
+            <div class="pixel-progress"></div>
+            <div class="status-lines">
+                <div class="status-line">> SCANNING TERRAIN DATA...</div>
+                <div class="status-line">> RENDERING TOPOGRAPHY...</div>
+                <div class="status-line">> CALCULATING NAVIGATION...</div>
+                <div class="status-line">> MAP PORTAL READY</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div id="main-content">
+        <!-- Бургер меню -->
+        <div class="burger-menu" id="burgerMenu">
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+        </div>
+
+        <!-- Оверлей меню -->
+        <div class="menu-overlay" id="menuOverlay"></div>
+
+        <!-- Боковое меню -->
+        <div class="side-menu" id="sideMenu">
+            <a href="NEFT.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>HOME</span>
+            </a>
+            <a href="news.html" class="menu-item">
+                <i class="fas fa-newspaper"></i>
+                <span>NEWS</span>
+            </a>
+            <a href="scripts.html" class="menu-item">
+                <i class="fas fa-code"></i>
+                <span>SCRIPTS</span>
+            </a>
+            <a href="maps.html" class="menu-item" style="background: rgba(255,255,255,0.1);">
+                <i class="fas fa-map"></i>
+                <span>MAPS</span>
+            </a>
+            <a href="places.html" class="menu-item">
+                <i class="fas fa-gamepad"></i>
+                <span>PLACES</span>
+            </a>
+        </div>
+
+        <!-- Фон -->
+        <canvas id="canvas-bg"></canvas>
+
+        <!-- Основной контент -->
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">MAPS</h1>
+                <div class="page-subtitle">TERRAIN & NAVIGATION DATA</div>
+            </div>
+
+            <div class="maps-grid">
+                <!-- Карта 1 -->
+                <div class="map-card">
+                    <div class="map-image">
+                        <i class="fas fa-mountain"></i>
+                    </div>
+                    <div class="map-content">
+                        <h3 class="map-title">Digital Highlands</h3>
+                        <div class="map-description">
+                            Mountainous terrain with strategic vantage points. Ideal for sniping positions and ambush tactics. Multiple cave systems and hidden paths.
+                        </div>
+                        <div class="map-stats">
+                            <span>Size: 5.2 km²</span>
+                            <span>Players: 32-64</span>
+                            <span>Type: PvP</span>
+                        </div>
+                        <a href="#" class="map-download">
+                            <i class="fas fa-download"></i> DOWNLOAD MAP
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Карта 2 -->
+                <div class="map-card">
+                    <div class="map-image">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <div class="map-content">
+                        <h3 class="map-title">Neo-Tokyo Sector</h3>
+                        <div class="map-description">
+                            Urban combat zone with dense building clusters. Vertical gameplay with rooftop access. Dynamic lighting and weather effects.
+                        </div>
+                        <div class="map-stats">
+                            <span>Size: 3.8 km²</span>
+                            <span>Players: 16-48</span>
+                            <span>Type: Urban</span>
+                        </div>
+                        <a href="#" class="map-download">
+                            <i class="fas fa-download"></i> DOWNLOAD MAP
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Карта 3 -->
+                <div class="map-card">
+                    <div class="map-image">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="map-content">
+                        <h3 class="map-title">Aqua Complex</h3>
+                        <div class="map-description">
+                            Underwater research facility with flooded corridors. Requires oxygen management. Unique underwater combat mechanics.
+                        </div>
+                        <div class="map-stats">
+                            <span>Size: 2.1 km²</span>
+                            <span>Players: 8-24</span>
+                            <span>Type: Indoor</span>
+                        </div>
+                        <a href="#" class="map-download">
+                            <i class="fas fa-download"></i> DOWNLOAD MAP
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Карта 4 -->
+                <div class="map-card">
+                    <div class="map-image">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <div class="map-content">
+                        <h3 class="map-title">Verdant Jungle</h3>
+                        <div class="map-description">
+                            Dense tropical rainforest with limited visibility. Wildlife AI interactions. Dynamic foliage that responds to player movement.
+                        </div>
+                        <div class="map-stats">
+                            <span>Size: 6.5 km²</span>
+                            <span>Players: 24-48</span>
+                            <span>Type: Survival</span>
+                        </div>
+                        <a href="#" class="map-download">
+                            <i class="fas fa-download"></i> DOWNLOAD MAP
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Карта 5 -->
+                <div class="map-card">
+                    <div class="map-image">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <div class="map-content">
+                        <h3 class="map-title">Industrial Wasteland</h3>
+                        <div class="map-description">
+                            Abandoned factory complex with hazardous materials. Explosive environmental hazards. Multi-level industrial structures.
+                        </div>
+                        <div class="map-stats">
+                            <span>Size: 4.3 km²</span>
+                            <span>Players: 20-40</span>
+                            <span>Type: Objective</span>
+                        </div>
+                        <a href="#" class="map-download">
+                            <i class="fas fa-download"></i> DOWNLOAD MAP
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Карта 6 -->
+                <div class="map-card">
+                    <div class="map-image">
+                        <i class="fas fa-space-shuttle"></i>
+                    </div>
+                    <div class="map-content">
+                        <h3 class="map-title">Orbital Station</h3>
+                        <div class="map-description">
+                            Zero-gravity space station with multiple modules. Magnetic boots required. Unique physics for projectile movement.
+                        </div>
+                        <div class="map-stats">
+                            <span>Size: 1.8 km²</span>
+                            <span>Players: 12-24</span>
+                            <span>Type: Experimental</span>
+                        </div>
+                        <a href="#" class="map-download">
+                            <i class="fas fa-download"></i> DOWNLOAD MAP
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Футер -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <div class="footer-logo">NEFT</div>
+                <div class="footer-text">
+                    PHILOSOPHICAL SOCIETY // DIGITAL FRONTIER // 2024
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Contact</a>
+                    <a href="#" class="footer-link">GitHub</a>
+                </div>
+                <div class="copyright">
+                    © 2024 NEFT Philosophical Society. All digital rights encrypted.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Инициализация двоичного дождя
+        function initBinaryRain() {
+            const binaryRain = document.getElementById('binaryRain');
+            for (let i = 0; i < 50; i++) {
+                const digit = document.createElement('div');
+                digit.className = 'binary-digit';
+                digit.textContent = Math.random() > 0.5 ? '0' : '1';
+                digit.style.left = `${Math.random() * 100}%`;
+                digit.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                digit.style.animationDelay = `${Math.random() * 2}s`;
+                digit.style.opacity = Math.random() * 0.3 + 0.1;
+                digit.style.fontSize = `${Math.random() * 10 + 10}px`;
+                binaryRain.appendChild(digit);
+            }
+        }
+
+        // Завершение загрузки
+        function completeLoading() {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                const mainContent = document.getElementById('main-content');
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+                mainContent.classList.add('main-loaded');
+                initMainScript();
+            }, 1000);
+        }
+
+        // Управление меню
+        function initMenu() {
+            const burgerMenu = document.getElementById('burgerMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const sideMenu = document.getElementById('sideMenu');
+
+            function closeMenu() {
+                burgerMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                sideMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            function openMenu() {
+                burgerMenu.classList.add('active');
+                menuOverlay.classList.add('active');
+                sideMenu.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function toggleMenu() {
+                if (burgerMenu.classList.contains('active')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            }
+
+            burgerMenu.addEventListener('click', toggleMenu);
+            menuOverlay.addEventListener('click', closeMenu);
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && burgerMenu.classList.contains('active')) {
+                    closeMenu();
+                }
+            });
+
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    closeMenu();
+                });
+            });
+        }
+
+        // Инициализация фона
+        function initCanvas() {
+            const canvas = document.getElementById('canvas-bg');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [];
+
+            function init() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                particles = Array.from({ length: 80 }, () => ({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    s: Math.random() * 2,
+                    d: Math.random() * 0.5 + 0.2
+                }));
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = "#fff";
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+                    ctx.fill();
+                    p.y += p.d;
+                    if (p.y > h) p.y = -10;
+                });
+                requestAnimationFrame(draw);
+            }
+
+            window.onresize = init;
+            init();
+            draw();
+        }
+
+        // Основная инициализация
+        function initMainScript() {
+            initMenu();
+            initCanvas();
+        }
+
+        // Запуск при загрузке
+        window.addEventListener('load', () => {
+            initBinaryRain();
+            const statusLines = document.querySelectorAll('.status-line');
+            statusLines.forEach((line, index) => {
+                setTimeout(() => {
+                    line.style.animation = 'lineAppear 0.3s forwards';
+                }, (index + 1) * 500);
+            });
+            setTimeout(completeLoading, 3500);
+        });
+
+        if (document.readyState === 'complete') {
+            initBinaryRain();
+            setTimeout(completeLoading, 2000);
+        }
+    </script>
+</body>
+</html>
